@@ -20,6 +20,33 @@ String cocktailIngredients[] = { "Tequila, Cointreau, Jus de citron vert", "Vodk
 
 
 
+void bottomArrows() {
+  M5.Lcd.fillRect(0,  M5.Lcd.height() - 45,  M5.Lcd.width(), 50, BLACK);
+  
+  int upPosition = 55;
+  M5.Lcd.drawTriangle(upPosition - 10, 230, upPosition + 10, 230, upPosition, 210, WHITE);
+  int downPosition = M5.Lcd.width() - upPosition;
+  M5.Lcd.drawTriangle(downPosition - 10, 210, downPosition + 10, 210, downPosition, 230, WHITE);
+  M5.Lcd.drawCircle(M5.Lcd.width() / 2, 220, 10, WHITE);
+}
+
+
+void bottomPlusMinus() {
+  M5.Lcd.fillRect(0,  M5.Lcd.height() - 45,  M5.Lcd.width(), 50, BLACK);
+  M5.Lcd.setTextColor(WHITE);
+  M5.Lcd.setTextFont(0);
+  M5.Lcd.setTextSize(4);
+  M5.Lcd.setTextDatum(MC_DATUM);
+
+  int upPosition = 55;
+  M5.Lcd.setCursor(upPosition - 7, 205);
+  M5.Lcd.println("+");
+
+  int downPosition = M5.Lcd.width() - upPosition;
+  M5.Lcd.setCursor(downPosition - 7, 205);
+  M5.Lcd.println("-");
+  M5.Lcd.drawCircle(M5.Lcd.width() / 2, 220, 10, WHITE);
+}
 
 
 // Fonction pour afficher une carte de cocktail
@@ -30,7 +57,7 @@ void displayCocktailCard() {
   M5.Lcd.setTextFont(0);
   M5.Lcd.setTextSize(3);
   M5.Lcd.setTextDatum(MC_DATUM);
-  M5.Lcd.drawString(String(currentCocktail)+" - " + cocktailNames[currentCocktail], M5.Lcd.width() / 2, 40);  // Affiche le nom du cocktail au centre de l'écran
+  M5.Lcd.drawString(String(currentCocktail+1)+" - " + cocktailNames[currentCocktail], M5.Lcd.width() / 2, 40);  // Affiche le nom du cocktail au centre de l'écran
   M5.Lcd.setTextFont(0);
   M5.Lcd.setTextSize(2);
   M5.Lcd.setTextDatum(TL_DATUM);
@@ -41,6 +68,8 @@ void displayCocktailCard() {
   M5.Lcd.setCursor(10, 105);
   M5.Lcd.setTextPadding(20);
   M5.Lcd.println(cocktailIngredients[currentCocktail]);
+  
+  bottomArrows();
 }
 
 void displayMenuQuantity() {
@@ -57,6 +86,8 @@ void displayMenuQuantity() {
   M5.Lcd.setTextDatum(MC_DATUM);
   M5.Lcd.drawString(String(quantity) + " cl", M5.Lcd.width() / 2, M5.Lcd.height() / 2 + 5);  // Affiche la liste des ingrédients
   M5.Lcd.setTextDatum(TL_DATUM);
+  
+  bottomPlusMinus();
 }
 
 void displayMakeCocktail() {
@@ -70,34 +101,6 @@ void displayMakeCocktail() {
   M5.Lcd.drawString("En cours : ", M5.Lcd.width() / 2, 40);  // Affiche le nom du cocktail au centre de l'écran
   M5.Lcd.setTextDatum(MC_DATUM);
   M5.Lcd.drawString(String(cocktailNames[currentCocktail]), M5.Lcd.width() / 2, 95);
-}
-
-void bottomArrows() {
-  Serial.println("Display Arrows");
-  M5.Lcd.drawRect(0,  M5.Lcd.height() - 45,  M5.Lcd.width(), 50, BLACK);
-  
-  int upPosition = 55;
-  M5.Lcd.drawTriangle(upPosition - 10, 230, upPosition + 10, 230, upPosition, 210, WHITE);
-  int downPosition = M5.Lcd.width() - upPosition;
-  M5.Lcd.drawTriangle(downPosition - 10, 210, downPosition + 10, 210, downPosition, 230, WHITE);
-  M5.Lcd.drawCircle(M5.Lcd.width() / 2, 220, 10, WHITE);
-}
-
-void bottomPlusMinus() {
-  M5.Lcd.drawRect(0,  M5.Lcd.height() - 45,  M5.Lcd.width(), 50, BLACK);
-  M5.Lcd.setTextColor(WHITE);
-  M5.Lcd.setTextFont(0);
-  M5.Lcd.setTextSize(4);
-  M5.Lcd.setTextDatum(MC_DATUM);
-
-  int upPosition = 55;
-  M5.Lcd.setCursor(upPosition - 7, 205);
-  M5.Lcd.println("+");
-
-  int downPosition = M5.Lcd.width() - upPosition;
-  M5.Lcd.setCursor(downPosition - 7, 205);
-  M5.Lcd.println("-");
-  M5.Lcd.drawCircle(M5.Lcd.width() / 2, 220, 10, WHITE);
 }
 
 void drawProgressBar(int x, int y, int width, int height, int progress, int COLOR) {
@@ -164,10 +167,9 @@ void displayQrCodeWifi() {
 }
 
 void displayM5() {
-  Serial.println("DisplayM5");
+  M5.update();
   switch (currentPage) {
     case LIST_COCKTAIL:
-      bottomArrows();
       if (M5.BtnA.wasPressed()) {  // Bouton A pour monter dans la liste
         currentCocktail = (currentCocktail + numCocktails - 1) % numCocktails;
         displayCocktailCard();
@@ -184,7 +186,6 @@ void displayM5() {
       }
       break;
     case POPUP_QUANTITY:
-      bottomPlusMinus();
       if (M5.BtnA.wasPressed()) {  // Bouton A pour monter dans la liste
         quantity += 5;
         displayMenuQuantity();
@@ -208,6 +209,5 @@ void displayM5() {
       }
       break;
   }
-  M5.update();
 }
 #endif
