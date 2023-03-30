@@ -1,10 +1,11 @@
+#ifndef DISPLAYMANAGER_H
+#define DISPLAYMANAGER_H
 #include <M5Stack.h>
 
 enum Pages {
   LIST_COCKTAIL,
   POPUP_QUANTITY,
   MAKE_COCKTAIL,
-  WIFI_CONNECTION,
   COCKTAIL_FINISH
 };
 
@@ -22,13 +23,14 @@ String cocktailIngredients[] = { "Tequila, Cointreau, Jus de citron vert", "Vodk
 
 
 // Fonction pour afficher une carte de cocktail
-void displayCocktailCard(String name, String ingredients) {
+void displayCocktailCard() {
+  currentPage = LIST_COCKTAIL;
   M5.Lcd.fillRect(0, 0, M5.Lcd.width(), M5.Lcd.height() - 45, WHITE);
   M5.Lcd.setTextColor(BLACK);
   M5.Lcd.setTextFont(0);
   M5.Lcd.setTextSize(3);
   M5.Lcd.setTextDatum(MC_DATUM);
-  M5.Lcd.drawString("1 - " + name, M5.Lcd.width() / 2, 40);  // Affiche le nom du cocktail au centre de l'écran
+  M5.Lcd.drawString(String(currentCocktail)+" - " + cocktailNames[currentCocktail], M5.Lcd.width() / 2, 40);  // Affiche le nom du cocktail au centre de l'écran
   M5.Lcd.setTextFont(0);
   M5.Lcd.setTextSize(2);
   M5.Lcd.setTextDatum(TL_DATUM);
@@ -38,10 +40,11 @@ void displayCocktailCard(String name, String ingredients) {
   M5.Lcd.setTextWrap(50, 0);
   M5.Lcd.setCursor(10, 105);
   M5.Lcd.setTextPadding(20);
-  M5.Lcd.println(ingredients);
+  M5.Lcd.println(cocktailIngredients[currentCocktail]);
 }
 
 void displayMenuQuantity() {
+  currentPage = POPUP_QUANTITY;
   M5.Lcd.fillRect(15, M5.Lcd.height() / 4, M5.Lcd.width() - 30, M5.Lcd.height() / 2, WHITE);
   M5.Lcd.drawRect(15, M5.Lcd.height() / 4, M5.Lcd.width() - 30, M5.Lcd.height() / 2, BLACK);
   M5.Lcd.setTextColor(BLACK);
@@ -57,6 +60,7 @@ void displayMenuQuantity() {
 }
 
 void displayMakeCocktail() {
+  currentPage = MAKE_COCKTAIL;
   M5.Lcd.fillScreen(BLACK);  // Efface l'écran
   M5.Lcd.fillRect(0, 0, M5.Lcd.width(), M5.Lcd.height(), WHITE);
   M5.Lcd.setTextColor(BLACK);
@@ -69,6 +73,9 @@ void displayMakeCocktail() {
 }
 
 void bottomArrows() {
+  Serial.println("Display Arrows");
+  M5.Lcd.drawRect(0,  M5.Lcd.height() - 45,  M5.Lcd.width(), 50, BLACK);
+  
   int upPosition = 55;
   M5.Lcd.drawTriangle(upPosition - 10, 230, upPosition + 10, 230, upPosition, 210, WHITE);
   int downPosition = M5.Lcd.width() - upPosition;
@@ -77,17 +84,18 @@ void bottomArrows() {
 }
 
 void bottomPlusMinus() {
+  M5.Lcd.drawRect(0,  M5.Lcd.height() - 45,  M5.Lcd.width(), 50, BLACK);
   M5.Lcd.setTextColor(WHITE);
   M5.Lcd.setTextFont(0);
   M5.Lcd.setTextSize(4);
   M5.Lcd.setTextDatum(MC_DATUM);
 
   int upPosition = 55;
-  M5.Lcd.setCursor(upPosition - 5, 205);
+  M5.Lcd.setCursor(upPosition - 7, 205);
   M5.Lcd.println("+");
 
   int downPosition = M5.Lcd.width() - upPosition;
-  M5.Lcd.setCursor(downPosition + 5, 205);
+  M5.Lcd.setCursor(downPosition - 7, 205);
   M5.Lcd.println("-");
   M5.Lcd.drawCircle(M5.Lcd.width() / 2, 220, 10, WHITE);
 }
@@ -126,32 +134,47 @@ void drawLoaderAsync(int x, int y, int height, int delayMs,int COLOR) {
   }
 }
 
-void wifiConnection() {
+void wifiConnectionScreen() {
   M5.Lcd.fillScreen(BLACK);  // Efface l'écran
   M5.Lcd.fillRect(0, 0, M5.Lcd.width(), M5.Lcd.height(), WHITE);
   M5.Lcd.setTextColor(BLACK);
   M5.Lcd.setTextFont(0);
   M5.Lcd.setTextSize(3);
   M5.Lcd.setTextDatum(MC_DATUM);
-  M5.Lcd.drawString("Connection Wifi", M5.Lcd.width() / 2, 40);  // Affiche le nom du cocktail au centre de l'écran
+     M5.Lcd.drawString("Recherche d'un", M5.Lcd.width() / 2,  M5.Lcd.height() / 2-35); 
+    M5.Lcd.drawString("reseau Wifi", M5.Lcd.width() / 2,  M5.Lcd.height() / 2);
+    M5.Lcd.drawString("connu", M5.Lcd.width() / 2,  M5.Lcd.height() / 2 +35);  
+ 
+}
+// Fonction pour afficher une carte de cocktail
+void displayQrCodeWifi() {
+  M5.Lcd.fillScreen(BLACK);  // Efface l'écran
+  M5.Lcd.fillRect(0, 0, M5.Lcd.width(), M5.Lcd.height(), WHITE);
+  M5.Lcd.setTextColor(BLACK); 
+  M5.Lcd.setTextFont(0);
+  M5.Lcd.setTextSize(2);
   M5.Lcd.setTextDatum(MC_DATUM);
-  M5.Lcd.drawString(WIFI_SSID, M5.Lcd.width() / 2, 95);
-      drawLoaderAsync(15, M5.Lcd.height() / 3 * 2, 25, 50, TFT_RED);
+  M5.Lcd.drawString("Connectez-vous au Wifi :", M5.Lcd.width() / 2, 30);  
+  M5.Lcd.setTextColor(BLUE);// 
+  M5.Lcd.drawString(WIFI_NAME, M5.Lcd.width() / 2, 60);
+  M5.Lcd.qrcode( "http://192.168.4.1",M5.Lcd.width() / 2-75, 95, 150,
+        6); 
+  M5.Lcd.setTextColor(BLACK);// 
+  M5.Lcd.drawString("Puis allez sur ce site :", M5.Lcd.width() / 2, 90);
 }
 
-
-void displayLoop() {
-  M5.update();
+void displayM5() {
+  Serial.println("DisplayM5");
   switch (currentPage) {
     case LIST_COCKTAIL:
       bottomArrows();
       if (M5.BtnA.wasPressed()) {  // Bouton A pour monter dans la liste
         currentCocktail = (currentCocktail + numCocktails - 1) % numCocktails;
-        displayCocktailCard(cocktailNames[currentCocktail], cocktailIngredients[currentCocktail]);
+        displayCocktailCard();
       }
       if (M5.BtnC.wasPressed()) {  // Bouton C pour descendre dans la liste
         currentCocktail = (currentCocktail + 1) % numCocktails;
-        displayCocktailCard(cocktailNames[currentCocktail], cocktailIngredients[currentCocktail]);
+        displayCocktailCard();
       }
       if (M5.BtnB.wasPressed()) {
         quantity = 15;
@@ -181,11 +204,10 @@ void displayLoop() {
       drawLoaderAsync(15, M5.Lcd.height() / 3 * 2, 25, 50, TFT_BLUE);
       if (M5.BtnB.wasPressed()) {
         currentPage = LIST_COCKTAIL;
-        displayCocktailCard(cocktailNames[currentCocktail], cocktailIngredients[currentCocktail]);
+        displayCocktailCard();
       }
       break;
-      case WIFI_CONNECTION:
-      drawLoaderAsync(15, M5.Lcd.height() / 3 * 2, 25, 50, TFT_RED);
-      break;
   }
+  M5.update();
 }
+#endif

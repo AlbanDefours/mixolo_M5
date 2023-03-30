@@ -1,5 +1,9 @@
+#ifndef DBMANAGER_H
+#define DBMANAGER_H
 #include <Arduino.h>
 #include <WiFi.h>
+#include "WifiManager.h"
+
 
 #include <Firebase_ESP_Client.h>
 #include <addons/TokenHelper.h>
@@ -32,8 +36,8 @@ unsigned long count = 0;
 
 void setupDB()
 {
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-
+  //WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  initWifiConnection();
   Serial.print("Connecting to Wi-Fi");
   unsigned long ms = millis();
   while (WiFi.status() != WL_CONNECTED)
@@ -41,6 +45,8 @@ void setupDB()
     Serial.print(".");
     delay(300);
   }
+  currentPage = LIST_COCKTAIL;
+  displayCocktailCard();
   Serial.println();
   Serial.print("Connected with IP: ");
   Serial.println(WiFi.localIP());
@@ -110,3 +116,4 @@ void setupDB()
 
   */
 }
+#endif
