@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include "WifiManager.h"
+#include <vector>
 
 
 #include <Firebase_ESP_Client.h>
@@ -28,6 +29,9 @@ FirebaseConfig config;
 unsigned long sendDataPrevMillis = 0;
 
 unsigned long count = 0;
+bool signupOK = false;
+
+using namespace std;
 
 void setupDB()
 {
@@ -59,6 +63,14 @@ void setupDB()
   /* Assign the RTDB URL (required) */
   config.database_url = DATABASE_URL;
 
+  /* Sign up */
+ /* if (Firebase.signUp(&config, &auth, "", "")){
+    Serial.println("ok");
+    signupOK = true;
+  }
+  else{
+    Serial.printf("%s\n", config.signer.signupError.message.c_str());
+  }
   /* Assign the callback function for the long running token generation task */
   config.token_status_callback = tokenStatusCallback; // see addons/TokenHelper.h
 
@@ -80,35 +92,22 @@ void setupDB()
   Firebase.setDoubleDigits(5);
 
   config.timeout.serverResponse = 10 * 1000;
-
-  /** Timeout options.
-
-  //WiFi reconnect timeout (interval) in ms (10 sec - 5 min) when WiFi disconnected.
-  config.timeout.wifiReconnect = 10 * 1000;
-
-  //Socket connection and SSL handshake timeout in ms (1 sec - 1 min).
-  config.timeout.socketConnection = 10 * 1000;
-
-  //Server response read timeout in ms (1 sec - 1 min).
-  config.timeout.serverResponse = 10 * 1000;
-
-  //RTDB Stream keep-alive timeout in ms (20 sec - 2 min) when no server's keep-alive event data received.
-  config.timeout.rtdbKeepAlive = 45 * 1000;
-
-  //RTDB Stream reconnect timeout (interval) in ms (1 sec - 1 min) when RTDB Stream closed and want to resume.
-  config.timeout.rtdbStreamReconnect = 1 * 1000;
-
-  //RTDB Stream error notification timeout (interval) in ms (3 sec - 30 sec). It determines how often the readStream
-  //will return false (error) when it called repeatedly in loop.
-  config.timeout.rtdbStreamError = 3 * 1000;
-
-  Note:
-  The function that starting the new TCP session i.e. first time server connection or previous session was closed, the function won't exit until the
-  time of config.timeout.socketConnection.
-
-  You can also set the TCP data sending retry with
-  config.tcp_data_sending_retry = 1;
-
-  */
 }
+
+void getContainer(){
+   if (Firebase.ready() && signupOK ) {
+    if (Firebase.RTDB.getArray(&fbdo, "/machines/"+String(MACHINE_ID)+"/containers")) {
+        Serial.println("TYPE : "+fbdo.dataType());
+      /*if (fbdo.dataType() == "int") {
+        intValue = fbdo.intData();
+        Serial.println(intValue);
+      }*/
+    }
+    else {
+      Serial.println(fbdo.errorReason());
+    }
+   }    
+}
+
+
 #endif

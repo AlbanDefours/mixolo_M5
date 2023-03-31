@@ -86,7 +86,7 @@ void writeFile(fs::FS &fs, const char * path, const char * message){
 
 // Initialize WiFi
 bool initWiFi() {
-wifiConnectionScreen();
+  wifiConnectionScreen();
   if(ssid=="" || ip==""){
     Serial.println("Undefined SSID or IP address.");
     return false;
@@ -127,10 +127,10 @@ void initWifiConnection() {
   pass = readFile(SPIFFS, passPath);
   ip = readFile(SPIFFS, ipPath);
   gateway = readFile (SPIFFS, gatewayPath);
-  Serial.println(ssid);
-  Serial.println(pass);
-  Serial.println(ip);
-  Serial.println(gateway);
+  //Serial.println(ssid);
+  //Serial.println(pass);
+  //Serial.println(ip);
+  //Serial.println(gateway);
 
   if(initWiFi()){
     displayCocktailCard();
