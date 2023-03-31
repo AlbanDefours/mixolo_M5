@@ -9,11 +9,6 @@
 #include <addons/TokenHelper.h>
 #include <addons/RTDBHelper.h>
 
-#define WIFI_SSID "Bbox-244F2D3D"
-#define WIFI_PASSWORD "rRepn4dANKitJDUvHS"
-
-// For the following credentials, see examples/Authentications/SignInAsUser/EmailPassword/EmailPassword.ino
-
 /* 2. Define the API Key */
 #define API_KEY "AIzaSyAG61QaFuKsOaGkttKnQVFad9eliV_Aibs"
 

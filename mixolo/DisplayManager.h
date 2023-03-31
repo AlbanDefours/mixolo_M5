@@ -181,7 +181,6 @@ void displayM5() {
       if (M5.BtnB.wasPressed()) {
         quantity = 15;
         currentPage = POPUP_QUANTITY;
-        M5.Lcd.fillRect(0, M5.Lcd.height() - 45, M5.Lcd.width(), 45, BLACK);
         displayMenuQuantity();
       }
       break;

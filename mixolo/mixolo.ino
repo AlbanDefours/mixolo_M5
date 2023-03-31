@@ -1,4 +1,5 @@
 #include <M5Stack.h>
+#define MACHINE_ID 1678288101932 
 
 const char* WIFI_NAME = "MIXOLO WIFI MANAGER";
 
