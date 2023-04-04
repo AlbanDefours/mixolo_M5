@@ -3,6 +3,8 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include "WifiManager.h"
+#include "Container.h"
+#include "Cocktail.h"
 #include <vector>
 
 
@@ -35,17 +37,16 @@ using namespace std;
 
 void setupDB()
 {
-  //WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   initWifiConnection();
-  Serial.print("Connecting to Wi-Fi");
   unsigned long ms = millis();
+  Serial.print("Connecting to Wi-Fi");
   while (WiFi.status() != WL_CONNECTED)
   {
     Serial.print(".");
     delay(300);
   }
+
   currentPage = LIST_COCKTAIL;
-  displayCocktailCard();
   Serial.println();
   Serial.print("Connected with IP: ");
   Serial.println(WiFi.localIP());
@@ -64,13 +65,13 @@ void setupDB()
   config.database_url = DATABASE_URL;
 
   /* Sign up */
- /* if (Firebase.signUp(&config, &auth, "", "")){
+  /*if (Firebase.signUp(&config, &auth, "", "")){
     Serial.println("ok");
     signupOK = true;
   }
   else{
     Serial.printf("%s\n", config.signer.signupError.message.c_str());
-  }
+  }*/
   /* Assign the callback function for the long running token generation task */
   config.token_status_callback = tokenStatusCallback; // see addons/TokenHelper.h
 
@@ -94,19 +95,60 @@ void setupDB()
   config.timeout.serverResponse = 10 * 1000;
 }
 
-void getContainer(){
-   if (Firebase.ready() && signupOK ) {
+vector<Container> loadContainers(){
+  vector<Container> containers;
+  if (Firebase.ready()  ) {
     if (Firebase.RTDB.getArray(&fbdo, "/machines/"+String(MACHINE_ID)+"/containers")) {
-        Serial.println("TYPE : "+fbdo.dataType());
-      /*if (fbdo.dataType() == "int") {
-        intValue = fbdo.intData();
-        Serial.println(intValue);
-      }*/
+      if (fbdo.dataType() == "array") {
+        FirebaseJsonArray &value = fbdo.jsonArray();
+        for(int i=0;i<value.size();i++){
+          FirebaseJsonData result;
+          FirebaseJson json;
+          value.get(result,i);
+          result.get<FirebaseJson>(json);
+          containers.push_back(Container(json,0,0,0));
+        }
+        for (auto i: containers)
+        Serial.println(String(i.name));
+      }
     }
     else {
       Serial.println(fbdo.errorReason());
     }
    }    
+    return &containers;
+   /*
+   vector<Container> con;
+   con.push_back(Container(0,"ingredient",75,0,0,0));
+   return con;*/
+}
+
+vector<Cocktail> loadCocktails(){
+  vector<Cocktail> cocktailsResult;
+   if (Firebase.ready()  ) {
+    if (Firebase.RTDB.getArray(&fbdo, "/machines/"+String(MACHINE_ID)+"/suggestions")) {
+      if (fbdo.dataType() == "array") {
+        FirebaseJsonArray &value = fbdo.jsonArray();
+        for(int i=0;i<value.size();i++){
+          FirebaseJsonData result;
+          FirebaseJson json;
+          value.get(result,i);
+          result.get<FirebaseJson>(json);
+          cocktailsResult.push_back(Cocktail(json));
+        }
+        for (auto i: cocktailsResult)
+        Serial.println(String(i.name));
+      }
+    }
+    else {
+      Serial.println(fbdo.errorReason());
+    }
+   }  
+    return cocktailsResult;
+   /*vector<Cocktail> cock;
+   vector<Ingredient> ing;
+   ing.push_back(Ingredient(0,"ingredient",75));
+   return cock;*/
 }
 
 

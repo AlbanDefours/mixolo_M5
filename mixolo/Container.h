@@ -3,6 +3,7 @@
 #define CONTAINER_h
 
 #include <Arduino.h>
+#include <Firebase_ESP_Client.h>
 #include "Ultrasonic.h"
 
 const float EMPTY_DISTANCE = 19;
@@ -22,6 +23,7 @@ class Container {
     int pumpPin;
 
     Container(int containerID,String containerName, int containerTotalAmount,int containerPumpPin,int containerTriggerPin,int containerEchoPin);
+    Container(FirebaseJson json,int containerPumpPin,int containerTriggerPin,int containerEchoPin);
     float calculRemaining();
     void pumpON();
     void pumpOFF();

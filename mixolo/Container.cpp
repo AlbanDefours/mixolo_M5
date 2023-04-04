@@ -12,6 +12,21 @@ Container::Container(int containerID,String containerName, int containerTotalAmo
   digitalWrite(pumpPin, LOW);
 }
 
+Container::Container(FirebaseJson json,int containerPumpPin,int containerTriggerPin,int containerEchoPin){
+  FirebaseJsonData result;
+  json.get(result, "id");
+  id   = result.to<int>();
+  json.get(result, "name");
+  name = result.to<String>();
+  json.get(result, "totalAmount");
+  totalAmount = result.to<int>();
+  triggerPin = containerTriggerPin;
+  echoPin = containerEchoPin;
+  pumpPin = containerPumpPin;
+  remainingAmount = calculRemaining();
+  digitalWrite(pumpPin, LOW);
+}
+
 float Container::calculRemaining() {
   Ultrasonic ultrasonic(triggerPin, echoPin);
   float distance = ultrasonic.read();

@@ -1,24 +1,35 @@
 #ifndef DISPLAYMANAGER_H
 #define DISPLAYMANAGER_H
 #include <M5Stack.h>
+#include "Cocktail.h"
+#include "DBManager.h"
 
 enum Pages {
   LIST_COCKTAIL,
   POPUP_QUANTITY,
   MAKE_COCKTAIL,
+  ERROR_PAGE,
   COCKTAIL_FINISH
 };
 
-const int numCocktails = 3;  // Nombre de cocktails dans la liste
 int currentCocktail = 0;     // Cocktail actuellement sélectionné
 int quantity = 15;
 Pages currentPage = LIST_COCKTAIL;
 
-// Liste des cocktails avec leur nom et leurs ingrédients
-String cocktailNames[] = { "Margarita", "Cosmopolitan", "Mojito" };
-String cocktailIngredients[] = { "Tequila, Cointreau, Jus de citron vert", "Vodka, Jus de cranberry, Jus de citron vert", "Rhum, Jus de citron vert, Menthe, Eau gazeuse" };
 
 
+
+void displayError(String message) {
+  currentPage = ERROR_PAGE;
+  M5.Lcd.fillScreen(RED);  // Efface l'écran
+  M5.Lcd.setTextColor(WHITE);
+  M5.Lcd.setTextFont(0);
+  M5.Lcd.setTextSize(3);
+  M5.Lcd.setTextDatum(MC_DATUM);
+  M5.Lcd.drawString("ERREUR : ", M5.Lcd.width() / 2, M5.Lcd.height() / 2 - 20);  // Affiche le nom du cocktail au centre de l'écran
+  M5.Lcd.setTextDatum(MC_DATUM);
+  M5.Lcd.drawString(message, M5.Lcd.width() / 2,  M5.Lcd.height() / 2 + 20);
+}
 
 void bottomArrows() {
   M5.Lcd.fillRect(0,  M5.Lcd.height() - 45,  M5.Lcd.width(), 50, BLACK);
@@ -50,26 +61,35 @@ void bottomPlusMinus() {
 
 
 // Fonction pour afficher une carte de cocktail
-void displayCocktailCard() {
-  currentPage = LIST_COCKTAIL;
-  M5.Lcd.fillRect(0, 0, M5.Lcd.width(), M5.Lcd.height() - 45, WHITE);
-  M5.Lcd.setTextColor(BLACK);
-  M5.Lcd.setTextFont(0);
-  M5.Lcd.setTextSize(3);
-  M5.Lcd.setTextDatum(MC_DATUM);
-  M5.Lcd.drawString(String(currentCocktail+1)+" - " + cocktailNames[currentCocktail], M5.Lcd.width() / 2, 40);  // Affiche le nom du cocktail au centre de l'écran
-  M5.Lcd.setTextFont(0);
-  M5.Lcd.setTextSize(2);
-  M5.Lcd.setTextDatum(TL_DATUM);
-  M5.Lcd.drawString("Ingredients :", 10, 80);  // Affiche la liste des ingrédients
-  M5.Lcd.setTextSize(2);
-  M5.Lcd.setTextWrap(true, false);
-  M5.Lcd.setTextWrap(50, 0);
-  M5.Lcd.setCursor(10, 105);
-  M5.Lcd.setTextPadding(20);
-  M5.Lcd.println(cocktailIngredients[currentCocktail]);
-  
-  bottomArrows();
+void displayCocktailCard(vector<Cocktail>& cocktails) {
+  if(!cocktails.empty()){
+    currentPage = LIST_COCKTAIL;
+    Cocktail cocktail = cocktails[currentCocktail];
+    M5.Lcd.fillRect(0, 0, M5.Lcd.width(), M5.Lcd.height() - 45, WHITE);
+    M5.Lcd.setTextColor(BLACK);
+    M5.Lcd.setTextFont(0);
+    M5.Lcd.setTextSize(3);
+    M5.Lcd.setTextDatum(MC_DATUM);
+    M5.Lcd.drawString(String(cocktail.id+1)+" - " + cocktail.name, M5.Lcd.width() / 2, 40);  // Affiche le nom du cocktail au centre de l'écran
+    M5.Lcd.setTextFont(0);
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setTextDatum(TL_DATUM);
+    M5.Lcd.drawString("Ingredients :", 10, 80);  // Affiche la liste des ingrédients
+    String ingredients = "";
+    for(int i=0;i<cocktail.ingredients.size();i++){
+      ingredients += " "+cocktail.ingredients[i].name+",";
+    }
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setTextWrap(true, false);
+    M5.Lcd.setTextWrap(50, 0);
+    M5.Lcd.setCursor(10, 105);
+    M5.Lcd.setTextPadding(20);
+    M5.Lcd.println(ingredients);
+    
+    bottomArrows();
+  }else{
+    displayError("Cocktails Empty");
+  }
 }
 
 void displayMenuQuantity() {
@@ -90,19 +110,23 @@ void displayMenuQuantity() {
   bottomPlusMinus();
 }
 
-void displayMakeCocktail() {
-  currentPage = MAKE_COCKTAIL;
-  M5.Lcd.fillScreen(BLACK);  // Efface l'écran
-  M5.Lcd.fillRect(0, 0, M5.Lcd.width(), M5.Lcd.height(), WHITE);
-  M5.Lcd.setTextColor(BLACK);
-  M5.Lcd.setTextFont(0);
-  M5.Lcd.setTextSize(3);
-  M5.Lcd.setTextDatum(MC_DATUM);
-  M5.Lcd.drawString("En cours : ", M5.Lcd.width() / 2, 40);  // Affiche le nom du cocktail au centre de l'écran
-  M5.Lcd.setTextDatum(MC_DATUM);
-  M5.Lcd.drawString(String(cocktailNames[currentCocktail]), M5.Lcd.width() / 2, 95);
+void displayMakeCocktail(vector<Cocktail>& cocktails) {
+  if(!cocktails.empty()){
+    currentPage = MAKE_COCKTAIL;
+    Cocktail cocktail = cocktails[currentCocktail];
+    M5.Lcd.fillScreen(BLACK);  // Efface l'écran
+    M5.Lcd.fillRect(0, 0, M5.Lcd.width(), M5.Lcd.height(), WHITE);
+    M5.Lcd.setTextColor(BLACK);
+    M5.Lcd.setTextFont(0);
+    M5.Lcd.setTextSize(3);
+    M5.Lcd.setTextDatum(MC_DATUM);
+    M5.Lcd.drawString("En cours : ", M5.Lcd.width() / 2, 40);  // Affiche le nom du cocktail au centre de l'écran
+    M5.Lcd.setTextDatum(MC_DATUM);
+    M5.Lcd.drawString(cocktail.name, M5.Lcd.width() / 2, 95);
+  }else{
+    displayError("Cocktails Empty");
+  }
 }
-
 void drawProgressBar(int x, int y, int width, int height, int progress, int COLOR) {
   int border = 2;
   int barHeight = height - 2 * border;
@@ -166,17 +190,17 @@ void displayQrCodeWifi() {
   M5.Lcd.drawString("Puis allez sur ce site :", M5.Lcd.width() / 2, 90);
 }
 
-void displayM5() {
+void displayM5(vector<Cocktail>& cocktails) {
   M5.update();
   switch (currentPage) {
     case LIST_COCKTAIL:
       if (M5.BtnA.wasPressed()) {  // Bouton A pour monter dans la liste
-        currentCocktail = (currentCocktail + numCocktails - 1) % numCocktails;
-        displayCocktailCard();
+        currentCocktail = (currentCocktail + cocktails.size() - 1) % cocktails.size();
+        displayCocktailCard(cocktails);
       }
       if (M5.BtnC.wasPressed()) {  // Bouton C pour descendre dans la liste
-        currentCocktail = (currentCocktail + 1) % numCocktails;
-        displayCocktailCard();
+        currentCocktail = (currentCocktail + 1) % cocktails.size();
+        displayCocktailCard(cocktails);
       }
       if (M5.BtnB.wasPressed()) {
         quantity = 15;
@@ -197,14 +221,14 @@ void displayM5() {
       }
       if (M5.BtnB.wasPressed()) {
         currentPage = MAKE_COCKTAIL;
-        displayMakeCocktail();
+        displayMakeCocktail(cocktails);
       }
       break;
     case MAKE_COCKTAIL:
       drawLoaderAsync(15, M5.Lcd.height() / 3 * 2, 25, 50, TFT_BLUE);
       if (M5.BtnB.wasPressed()) {
         currentPage = LIST_COCKTAIL;
-        displayCocktailCard();
+        displayCocktailCard(cocktails);
       }
       break;
   }

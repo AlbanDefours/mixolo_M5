@@ -1,5 +1,5 @@
 #ifndef WIFIMANAGER_H
-#define WFIMANAGER_H
+#define WIFIMANAGER_H
 #include <M5Stack.h>
 #include <Arduino.h>
 #include <WiFi.h>
@@ -14,29 +14,15 @@ AsyncWebServer server(80);
 // Search for parameter in HTTP POST request
 const char* PARAM_INPUT_1 = "ssid";
 const char* PARAM_INPUT_2 = "pass";
-const char* PARAM_INPUT_3 = "ip";
-const char* PARAM_INPUT_4 = "gateway";
 
 
 //Variables to save values from HTML form
 String ssid;
 String pass;
-String ip;
-String gateway;
 
 // File paths to save input values permanently
 const char* ssidPath = "/ssid.txt";
 const char* passPath = "/pass.txt";
-const char* ipPath = "/ip.txt";
-const char* gatewayPath = "/gateway.txt";
-
-IPAddress localIP;
-//IPAddress localIP(192, 168, 1, 200); // hardcoded
-
-// Set your Gateway IP address
-IPAddress localGateway;
-//IPAddress localGateway(192, 168, 1, 1); //hardcoded
-IPAddress subnet(255, 255, 0, 0);
 
 // Timer variables
 unsigned long previousMillis = 0;
@@ -84,23 +70,34 @@ void writeFile(fs::FS &fs, const char * path, const char * message){
   }
 }
 
+String getSSID(){
+  
+  initSPIFFS();
+  
+  // Load values saved in SPIFFS
+  ssid = readFile(SPIFFS, ssidPath);
+  return ssid;
+}
+
+String getPass(){
+  
+  initSPIFFS();
+  
+  // Load values saved in SPIFFS
+  pass = readFile(SPIFFS, passPath);
+  return pass;
+}
+
 // Initialize WiFi
 bool initWiFi() {
   wifiConnectionScreen();
-  if(ssid=="" || ip==""){
-    Serial.println("Undefined SSID or IP address.");
+  if(ssid=="" ){
+    Serial.println("Undefined SSID address.");
     return false;
   }
 
-  WiFi.mode(WIFI_STA);
-  localIP.fromString(ip.c_str());
-  localGateway.fromString(gateway.c_str());
+  //WiFi.mode(WIFI_STA);
 
-
-  if (!WiFi.config(localIP, localGateway, subnet)){
-    Serial.println("STA Failed to configure");
-    return false;
-  }
   WiFi.begin(ssid.c_str(), pass.c_str());
   Serial.println("Connecting to WiFi...");
 
@@ -125,15 +122,11 @@ void initWifiConnection() {
   // Load values saved in SPIFFS
   ssid = readFile(SPIFFS, ssidPath);
   pass = readFile(SPIFFS, passPath);
-  ip = readFile(SPIFFS, ipPath);
-  gateway = readFile (SPIFFS, gatewayPath);
   //Serial.println(ssid);
   //Serial.println(pass);
-  //Serial.println(ip);
-  //Serial.println(gateway);
 
   if(initWiFi()){
-    displayCocktailCard();
+    //displayCocktailCard(nullptr);
   }else {
     // Connect to Wi-Fi network with SSID and password
     Serial.println("Setting AP (Access Point)");
@@ -173,29 +166,13 @@ void initWifiConnection() {
             // Write file to save value
             writeFile(SPIFFS, passPath, pass.c_str());
           }
-          // HTTP POST ip value
-          if (p->name() == PARAM_INPUT_3) {
-            ip = p->value().c_str();
-            Serial.print("IP Address set to: ");
-            Serial.println(ip);
-            // Write file to save value
-            writeFile(SPIFFS, ipPath, ip.c_str());
-          }
-          // HTTP POST gateway value
-          if (p->name() == PARAM_INPUT_4) {
-            gateway = p->value().c_str();
-            Serial.print("Gateway set to: ");
-            Serial.println(gateway);
-            // Write file to save value
-            writeFile(SPIFFS, gatewayPath, gateway.c_str());
-          }
           //Serial.printf("POST[%s]: %s\n", p->name().c_str(), p->value().c_str());
         }
       }
       // Web Server Root URL
-   // server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(SPIFFS, "/wificonnect.html", "text/html");
-   // });
+     });
       delay(5000);
       ESP.restart();
     });

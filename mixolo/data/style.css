@@ -15,7 +15,7 @@ p {
 
 .topnav { 
   overflow: hidden; 
-  background-color: #0A1128;
+  background-color: #fba801;
 }
 
 body {  
@@ -48,7 +48,7 @@ body {
 input[type=submit] {
   border: none;
   color: #FEFCFB;
-  background-color: #034078;
+  background-color: #3700b3;
   padding: 15px 15px;
   text-align: center;
   text-decoration: none;
