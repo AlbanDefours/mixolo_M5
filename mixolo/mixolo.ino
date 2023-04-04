@@ -15,8 +15,8 @@ void setup() {
   Serial.begin(115200);
   M5.begin();
   M5.Lcd.fillScreen(RED);
-  //WiFi.mode(WIFI_STA);
-  //setupDB();
+  WiFi.mode(WIFI_STA);
+  setupDB();
   loadData();
   displayCocktailCard(cocktails);
   //displayCocktailCard();
@@ -32,15 +32,15 @@ void loadData(){
 }
 
 void loop() { 
- /*if(WiFi.status() == WL_CONNECTED){
+ if(WiFi.status() == WL_CONNECTED){
   waitConnection = false;*/
   displayM5(cocktails);
-/* }else{
+ }else{
   if(!waitConnection){
     setupDB();
     waitConnection = true;
   }
- }*/
+ }
   //Serial.printf("Distance: %.1f cm\n", distance); // Affichage de la distance sur le port série pour le débogage
  // delay(500);
 }

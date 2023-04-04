@@ -116,7 +116,7 @@ vector<Container> loadContainers(){
       Serial.println(fbdo.errorReason());
     }
    }    
-    return &containers;
+    return containers;
    /*
    vector<Container> con;
    con.push_back(Container(0,"ingredient",75,0,0,0));
