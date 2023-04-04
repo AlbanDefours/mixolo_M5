@@ -3,7 +3,6 @@
 
 const char* WIFI_NAME = "MIXOLO WIFI MANAGER";
 
-#include "Ultrasonic.h"
 #include "DBManager.h"
 #include "DisplayManager.h"
 bool waitConnection = true;
@@ -33,7 +32,7 @@ void loadData(){
 
 void loop() { 
  if(WiFi.status() == WL_CONNECTED){
-  waitConnection = false;*/
+  waitConnection = false;
   displayM5(cocktails);
  }else{
   if(!waitConnection){

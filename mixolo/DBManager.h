@@ -35,6 +35,12 @@ bool signupOK = false;
 
 using namespace std;
 
+vector<vector<int>> pinList = {{
+        {0x50, 0, 0x51},
+        {0x52, 0, 0x53},
+        {0x54, 0, 0x55}
+    }};
+
 void setupDB()
 {
   initWifiConnection();
@@ -106,7 +112,7 @@ vector<Container> loadContainers(){
           FirebaseJson json;
           value.get(result,i);
           result.get<FirebaseJson>(json);
-          containers.push_back(Container(json,0,0,0));
+          containers.push_back(Container(json,pinList[i][2],pinList[i][1],pinList[i][0]));
         }
         for (auto i: containers)
         Serial.println(String(i.name));
